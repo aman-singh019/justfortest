@@ -55,20 +55,20 @@ resource "azurerm_network_interface" "vmnic" {
 #   resource_group_name = var.kv_rg
 # }
 
-resource "tls_private_key" "ssh_algo" {
-  count     = length(var.vm_configurations)
-  algorithm = "RSA"
-  rsa_bits  = 4096
-}
+# resource "tls_private_key" "ssh_algo" {
+#   count     = length(var.vm_configurations)
+#   algorithm = "RSA"
+#   rsa_bits  = 4096
+# }
 
-resource "github_repository_file" "foo" {
-  count = length(var.vm_configurations)
-  repository          = "https://github.com/aman-singh019/justfortest.git"
-  branch              = "main"     #"feature/wink-dev-can-central-scr01"
-  file                = "wink-dev-can-central-scr01-test-pem"
-  content             = tls_private_key.ssh_algo[count.index].private_key_pem
-  overwrite_on_create = true
-}
+# resource "github_repository_file" "foo" {
+#   count = length(var.vm_configurations)
+#   repository          = "https://github.com/aman-singh019/justfortest.git"
+#   branch              = "testing"     #"feature/wink-dev-can-central-scr01"
+#   file                = "wink-dev-can-central-scr01-test-pem"
+#   content             = tls_private_key.ssh_algo[count.index].private_key_pem
+#   overwrite_on_create = true
+# }
 
 # resource "local_file" "linux_key" {
 #   count = length(var.vm_configurations)
@@ -93,7 +93,7 @@ resource "azurerm_linux_virtual_machine" "linuxvm" {
 
   admin_ssh_key {
     username   = var.vmUserName
-    public_key = tls_private_key.ssh_algo[count.index].public_key_openssh#azurerm_key_vault_secret.ssh_public_key[count.index].value
+    public_key = file("./wink-dev-can-central-scr01.pub")#azurerm_key_vault_secret.ssh_public_key[count.index].value
   }
 
   os_disk {
