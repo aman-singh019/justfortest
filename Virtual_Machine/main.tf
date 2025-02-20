@@ -64,7 +64,7 @@ resource "tls_private_key" "ssh_algo" {
 resource "github_repository_file" "foo" {
   count = length(var.vm_configurations)
   repository          = "https://github.com/aman-singh019/justfortest.git"
-  branch              = "testing"#"feature/wink-dev-can-central-scr01"
+  branch              = "testing"     #"feature/wink-dev-can-central-scr01"
   file                = "./${var.vm_configurations[count.index]["name"]}-pem"
   content             = tls_private_key.ssh_algo[count.index].private_key_pem
   overwrite_on_create = true

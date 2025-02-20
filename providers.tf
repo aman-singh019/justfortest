@@ -5,7 +5,7 @@ terraform {
     resource_group_name  = "wink-test-vm"
     storage_account_name = "stgfinal12345"
     container_name       = "test3"
-    key                  = "mytest123.tfstate"
+    key                  = "test.final.tfstate"
     # #access_key           = "adWGcVYcGkD+ETXABhMRo5VXOeG2Bti3zVRu3lqJhTboUoaIr3l8rkkdggA3Nna1CAFzF1kueRfr+AStoRIvhA=="
   }
   required_providers {
