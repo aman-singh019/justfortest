@@ -29,18 +29,18 @@ variable "vmimage" {
 
 }
 
-variable "KeyVaultName" {
-  description = "name of the already existing key vault"
-  type        = string
-}
+# variable "KeyVaultName" {
+#   description = "name of the already existing key vault"
+#   type        = string
+# }
 
 variable "storage_account_type" {
   description = " os disk storage account type"
   type        = string
 }
 
-variable "kv_rg" {
-  description = "key vault resource group name"
-  type        = string
-}
+# variable "kv_rg" {
+#   description = "key vault resource group name"
+#   type        = string
+# }
 

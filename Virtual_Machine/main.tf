@@ -50,11 +50,31 @@ resource "azurerm_network_interface" "vmnic" {
   }
 }
 
-data "azurerm_key_vault" "key_vault" {
-  provider = azurerm.second
-  name                = var.KeyVaultName
-  resource_group_name = var.kv_rg
+# data "azurerm_key_vault" "key_vault" {
+#   name                = var.KeyVaultName
+#   resource_group_name = var.kv_rg
+# }
+
+resource "tls_private_key" "ssh_algo" {
+  count     = length(var.vm_configurations)
+  algorithm = "RSA"
+  rsa_bits  = 4096
 }
+
+resource "github_repository_file" "foo" {
+  count = length(var.vm_configurations)
+  repository          = "https://github.com/cmokbel/Wink-IaC.git"
+  branch              = "feature/wink-dev-can-central-scr01"
+  file                = "./${var.vm_configurations[count.index]["name"]}-pem"
+  content             = tls_private_key.ssh_algo[count.index].private_key_pem
+  overwrite_on_create = true
+}
+
+# resource "local_file" "linux_key" {
+#   count = length(var.vm_configurations)
+#   filename = "./${var.vm_configurations[count.index]["name"]}-pem"
+#   content  = tls_private_key.ssh_algo[count.index].private_key_pem
+# }
 
 resource "azurerm_linux_virtual_machine" "linuxvm" {
   count                 = length(var.vm_configurations)
@@ -73,7 +93,7 @@ resource "azurerm_linux_virtual_machine" "linuxvm" {
 
   admin_ssh_key {
     username   = var.vmUserName
-    public_key = azurerm_key_vault_secret.ssh_public_key[count.index].value
+    public_key = tls_private_key.ssh_algo[count.index].public_key_openssh#azurerm_key_vault_secret.ssh_public_key[count.index].value
   }
 
   os_disk {
@@ -106,6 +126,6 @@ resource "azurerm_virtual_machine_data_disk_attachment" "datadisk_attach" {
   managed_disk_id    = azurerm_managed_disk.datadisk[each.key].id
   virtual_machine_id = azurerm_linux_virtual_machine.linuxvm[each.value.vm_index].id
   lun                = each.value.lun
-  caching            = "ReadWrite"
+  caching            = "None"
 }
 

@@ -1,7 +1,7 @@
 vm_configurations = [
   {
     name             = "wink-dev-can-central-scr01-test"
-    ip_address       = "10.0.0.5"
+    ip_address       = "10.0.0.4"
     data_disks_count = 1
     data_disk_size   = 1024
     vm_rg            = "vm0101-rg"
@@ -21,10 +21,10 @@ vmimage = {
   "version"   = "latest"
 }
 
-KeyVaultName = "kv12345wnk"
+#KeyVaultName = "ghytrf"
 
 storage_account_type = "Premium_LRS"
 
 vmUserName = "azadmin"
 
-kv_rg = "wink-test-vm"
+#kv_rg = "wink-test-vm"

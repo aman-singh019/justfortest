@@ -1,4 +1,4 @@
-name: "test pipeline"
+name: "dev-scr01 vm deployment cicd"
 
 on:
   workflow_dispatch:
