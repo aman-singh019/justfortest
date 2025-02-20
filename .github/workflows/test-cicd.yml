@@ -10,7 +10,7 @@ jobs:
     environment: dev
     defaults:
       run:
-        working-directory: ./Virtual_Machine
+        working-directory: ./
 
     steps:
     - name: Checkout
@@ -73,7 +73,7 @@ jobs:
     defaults:
       run:
         shell: bash
-        working-directory: ./Virtual_Machine
+        working-directory: ./
 
     steps:
     - name: Checkout
