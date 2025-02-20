@@ -1,0 +1,106 @@
+name: "test pipeline"
+
+on:
+  workflow_dispatch:
+
+jobs:
+  terraform-plan:
+    name: 'Terraform Plan'
+    runs-on: ubuntu-latest
+    environment: dev
+    defaults:
+      run:
+        working-directory: ./Virtual_Machine
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: 1.6.5
+
+    - name: Debug Variables
+      run: |
+        echo "STORAGE_ACCOUNT_NAME: ${{ secrets.AZ_SA_STORAGE_ACCOUNT_NAME }}"
+        echo "CONTAINER_NAME: ${{ secrets.AZ_SA_CONTAINER_NAME }}"
+        echo "RESOURCE_GROUP_NAME: ${{ secrets.AZ_SA_RESOURCE_GROUP_NAME }}"
+        echo "BACKEND_KEY: ${{ secrets.AZ_SA_BACKEND_KEY }}"
+
+    - name: Terraform Init
+      id: init
+      env:
+        ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+        ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+        ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID}}
+        ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID  }}
+        RESOURCE_GROUP_NAME: ${{ secrets.AZ_SA_RESOURCE_GROUP_NAME }}
+        STORAGE_ACCOUNT_NAME: ${{ secrets.AZ_SA_STORAGE_ACCOUNT_NAME }}
+        CONTAINER_NAME: ${{ secrets.AZ_SA_CONTAINER_NAME }}
+        BACKEND_KEY: "${{ secrets.AZ_SA_BACKEND_KEY }}"
+      run: terraform init -backend-config="storage_account_name=$STORAGE_ACCOUNT_NAME" -backend-config="container_name=$CONTAINER_NAME" -backend-config="resource_group_name=$RESOURCE_GROUP_NAME" -backend-config="key=$BACKEND_KEY"
+
+    - name: Terraform Validate
+      id: validate
+      run: terraform validate -no-color
+
+    - name: Terraform Plan
+      id: plan
+      env:
+        ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+        ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+        ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+        ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+      run: terraform plan -input=false
+
+  plan-review-approve:
+    needs: terraform-plan
+    name: 'Review TF Plan and Approve'
+    runs-on: ubuntu-latest
+    environment: dev  # Use the environment that requires approval
+    steps:
+    - name: Approval
+      run: |
+        echo "Approval by: <Name of the approval>" 
+        echo "Plan approved by <Name of the approval>"
+      # This step will wait for approval before proceeding
+  terraform-apply:
+    needs: plan-review-approve
+    name: 'Terraform Apply'
+    runs-on: ubuntu-latest
+    environment: dev
+    defaults:
+      run:
+        shell: bash
+        working-directory: ./Virtual_Machine
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: 1.6.5
+
+    - name: Terraform Init
+      id: init
+      env:
+        ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+        ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+        ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+        ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+        RESOURCE_GROUP_NAME: ${{ secrets.AZ_SA_RESOURCE_GROUP_NAME }}
+        STORAGE_ACCOUNT_NAME: ${{ secrets.AZ_SA_STORAGE_ACCOUNT_NAME }}
+        CONTAINER_NAME: ${{ secrets.AZ_SA_CONTAINER_NAME }}
+        BACKEND_KEY: "${{ secrets.AZ_SA_BACKEND_KEY }}"
+      run: terraform init -backend-config="storage_account_name=$STORAGE_ACCOUNT_NAME" -backend-config="container_name=$CONTAINER_NAME" -backend-config="resource_group_name=$RESOURCE_GROUP_NAME" -backend-config="key=$BACKEND_KEY"
+
+    - name: Terraform Apply
+      env:
+        ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+        ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+        ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+        ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+      run: terraform apply -auto-approve
