@@ -32,7 +32,7 @@ provider "dns" {
 }
 
 provider "azurerm" {
-  subscription_id = "3e3f5f63-438b-4205-b50e-df27fa676994"
+  subscription_id = "41c298fc-f608-494b-8bfe-2e6684d44561"
   features {}
 }
 provider "azurerm" {
