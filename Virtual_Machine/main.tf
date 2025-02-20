@@ -51,6 +51,7 @@ resource "azurerm_network_interface" "vmnic" {
 }
 
 data "azurerm_key_vault" "key_vault" {
+  provider = azurerm.second
   name                = var.KeyVaultName
   resource_group_name = var.kv_rg
 }
